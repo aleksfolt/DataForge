@@ -4,7 +4,7 @@ import i18next from "i18next";
 import Backend from "i18next-fs-backend";
 import * as path from "path";
 import config from "./config";
-import { commandsComposer } from "./handlers/commands";
+import { commandsComposer } from "./commands/index";
 import { handlersComposer } from "./handlers/handlers";
 import connectDB from "./database/connection";
 

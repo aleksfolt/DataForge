@@ -6,37 +6,42 @@ import type { ChatMemberUpdated } from "grammy/types";
 export const handlersComposer = new Composer<MyContext>();
 
 function hasRequiredPrivileges(admin: ChatMemberUpdated["new_chat_member"]): boolean {
-  return admin.status === "administrator" &&
-    (admin.can_pin_messages || admin.can_delete_messages);
+  return admin.status === "creator" || 
+         (admin.status === "administrator" && 
+          (admin.can_pin_messages || admin.can_delete_messages));
 }
 
 handlersComposer.on("my_chat_member", async (ctx) => {
-  const { new_chat_member } = ctx.update.my_chat_member;
+  const { new_chat_member: newMember, old_chat_member: oldMember } = ctx.update.my_chat_member;
+  if (newMember.user.id !== ctx.me.id) return;
   
-  if (new_chat_member.user.id === ctx.me.id) {
-    if (new_chat_member.status === "member" || new_chat_member.status === "administrator") {
-      const msg = ctx.t("group.welcome", {
-        username: ctx.me.username,
-      });
-      await ctx.reply(msg, {parse_mode: "HTML"});
-      
-      const initialAdmins: number[] = [];
-      await addOrUpdateChat(ctx.chat.id, true, initialAdmins);
-      
-      try {
-        const admins = await ctx.getChatAdministrators();
-        for (const admin of admins) {
-          if (hasRequiredPrivileges(admin)) {
-            await addAdminToChat(ctx.chat.id, admin.user.id);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching or adding admins:', error);
+  const chatId = ctx.chat.id;
+  const chatTitle = ctx.chat.title || "";
+  const wasAdmin = oldMember.status === "administrator";
+  
+  if (newMember.status === "administrator") {
+    await ctx.reply(ctx.t("group.welcome_admin", { username: ctx.me.username }), { parse_mode: "HTML" });
+    await addOrUpdateChat(chatId, true, [], chatTitle);
+    try {
+      const admins = await ctx.getChatAdministrators();
+      for (const admin of admins) {
+        if (hasRequiredPrivileges(admin)) await addAdminToChat(chatId, admin.user.id);
       }
+    } catch (error) { console.error('Error:', error); }
+  } 
+  else if (newMember.status === "member") {
+    if (oldMember.status === "administrator") {
+      const msg = ctx.t("group.lost_admin")
+      await ctx.reply(msg, { parse_mode: "HTML" });
+      await addOrUpdateChat(chatId, false, [], chatTitle);
+    } else {
+      const msg = ctx.t("group.welcome", { username: ctx.me.username });
+      await ctx.reply(msg, { parse_mode: "HTML" });
+      await addOrUpdateChat(chatId, false, [], chatTitle);
     }
-    else if (new_chat_member.status === "left" || new_chat_member.status === "kicked") {
-      await setChatWork(ctx.chat.id, false);
-    }
+  } 
+  else if (["left", "kicked"].includes(newMember.status)) {
+    wasAdmin ? await addOrUpdateChat(chatId, true, [], chatTitle) : await setChatWork(chatId, false);
   }
 });
 
