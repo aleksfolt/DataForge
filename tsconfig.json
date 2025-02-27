@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "commonjs",
+    "outDir": "dist",
+    "rootDir": "src",
+    "lib": ["ESNext", "dom"],
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "baseUrl": "./src",
+    "paths": {
+      "@handlers/*": ["handlers/*"],
+      "@database/*": ["database/*"],
+      "@types": ["types"]
+    },
+    "skipLibCheck": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,27 @@
+{
+    "name": "grammy-bot-template",
+    "version": "1.0.0",
+    "description": "Telegram bot using grammY (TypeScript) with i18next for internationalization, database integration, and command handling.",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "dev": "ts-node src/index.ts"
+    },
+    "dependencies": {
+        "grammy": "^1.35.0",
+        "i18next": "^22.4.7",
+        "i18next-fs-backend": "^2.2.1",
+        "js-yaml": "^4.1.0",
+        "mongoose": "^8.11.0",
+        "pg": "^8.11.0"
+    },
+    "devDependencies": {
+        "@types/js-yaml": "^4.0.9",
+        "@types/node": "^16.18.0",
+        "@types/node-fetch": "^2.6.12",
+        "ts-node": "^10.9.1",
+        "tsconfig-paths": "^4.2.0",
+        "typescript": "^5.7.3"
+    }
+}
